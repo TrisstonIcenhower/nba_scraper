@@ -1,0 +1,12 @@
+{
+  "name": "nba_scraper",
+  "version": "0.0.1",
+  "description": "A webscraper for scraping NBA teams and their player's into a CSV",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "author": "Trisston Icenhower",
+  "license": "MIT"
+}
