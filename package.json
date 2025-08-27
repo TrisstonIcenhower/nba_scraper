@@ -8,5 +8,8 @@
   },
   "type": "module",
   "author": "Trisston Icenhower",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.11.0"
+  }
 }
