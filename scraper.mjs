@@ -1,14 +1,10 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
-import { writeFileSync } from "fs";
 
 const NBA_BASE_URL = "https://nba.com";
-const NBA_TEAM_JSON_FILE = "league";
 
 async function scrape_teams() {
   let teamsObj = {};
-  const JSONtoFile = (object, filename) =>
-    writeFileSync(`${filename}.json`, JSON.stringify(object));
 
   let response = await axios.get("https://nba.com/teams");
 
@@ -42,8 +38,7 @@ async function scrape_teams() {
         players: players,
       };
       teamsObj[teamName] = teamObj;
-
-      JSONtoFile(teamsObj, NBA_TEAM_JSON_FILE);
+      return teamsObj;
     }
   } catch (error) {
     console.log("Error");
@@ -80,6 +75,9 @@ async function scrape_players(profile_url) {
       let playerName =
         playerTable[`${i}`].firstChild.firstChild.children[PLAYER_DATA.PLAYER]
           .data;
+      let playerLink = 
+        NBA_BASE_URL + playerTable[`${i}`].firstChild.firstChild.attribs.href;
+      let playerImageLink = await scrape_player_image(playerLink);
       let playerNumber;
       try {
         playerNumber =
@@ -121,12 +119,28 @@ async function scrape_players(profile_url) {
         experience: playerExp,
         school: playerSchool,
         aquisition: playerAquisition,
+        link: playerLink,
+        playerImageLink: playerImageLink,
       };
     }
 
     return players;
   } catch (error) {
     console.log("Cheerio failed to load response at players ");
+    console.log(error);
+  }
+}
+
+async function scrape_player_image(player_url){
+  let response = await axios.get(player_url);
+
+  try {
+    const $ = cheerio.load(response.data);
+    let playerImageLink = $("img.PlayerImage_image__wH_YX")[0].attribs.src;
+
+    return playerImageLink;
+  } catch (error) {
+    console.log("Cheerio failed to load response at player images ");
     console.log(error);
   }
 }
