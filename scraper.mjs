@@ -38,11 +38,12 @@ async function scrape_teams() {
         players: players,
       };
       teamsObj[teamName] = teamObj;
-      return teamsObj;
     }
+    return teamsObj;
   } catch (error) {
     console.log("Error");
     console.log(error);
+    return {};
   }
 }
 
@@ -128,6 +129,7 @@ async function scrape_players(profile_url) {
   } catch (error) {
     console.log("Cheerio failed to load response at players ");
     console.log(error);
+    return [];
   }
 }
 
@@ -142,6 +144,7 @@ async function scrape_player_image(player_url){
   } catch (error) {
     console.log("Cheerio failed to load response at player images ");
     console.log(error);
+    return "";
   }
 }
 
