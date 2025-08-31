@@ -1,12 +1,26 @@
 import axios from "axios";
 import * as cheerio from "cheerio";
 
+// Attempt to stagger requests in order to not get blocked.
+const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
+// Fake Header to attempt to appear like real browser
+const HEADER = {
+  headers: {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Referer": "https://www.nba.com/",
+    "Connection": "keep-alive",
+  }
+};
+
 const NBA_BASE_URL = "https://nba.com";
 
 async function scrape_teams() {
   let teamsObj = {};
 
-  let response = await axios.get("https://nba.com/teams");
+  let response = await axios.get("https://nba.com/teams", HEADER);
 
   try {
     const $ = cheerio.load(response.data);
@@ -48,6 +62,7 @@ async function scrape_teams() {
 }
 
 async function scrape_players(profile_url) {
+  await wait(200 + Math.random() * 500);
   const PLAYER_DATA = {
     PLAYER: 0,
     NUMBER: 1,
@@ -63,7 +78,7 @@ async function scrape_players(profile_url) {
   Object.freeze(PLAYER_DATA);
   let players = {};
 
-  let response = await axios.get(profile_url);
+  let response = await axios.get(profile_url, HEADER);
 
   try {
     const $ = cheerio.load(response.data);
@@ -72,45 +87,46 @@ async function scrape_players(profile_url) {
       "div.TeamRoster_tableContainer__CUtM0 > table > tbody"
     ).children("tr");
 
-    for (let i = 0; i < playerTable.length; i++) {
+    const players = await playerTable.map((row) => {
       let playerName =
-        playerTable[`${i}`].firstChild.firstChild.children[PLAYER_DATA.PLAYER]
+        playerTable[row].firstChild.firstChild.children[PLAYER_DATA.PLAYER]
           .data;
-      let playerLink = 
-        NBA_BASE_URL + playerTable[`${i}`].firstChild.firstChild.attribs.href;
-      let playerImageLink = await scrape_player_image(playerLink);
+      let playerLink =
+        NBA_BASE_URL + playerTable[row].firstChild.firstChild.attribs.href;
+      let playerImageLink = scrape_player_image(playerLink);
       let playerNumber;
       try {
         playerNumber =
-          playerTable[`${i}`].children[PLAYER_DATA.NUMBER].children[0].data;
+          playerTable[row].children[PLAYER_DATA.NUMBER].children[0].data;
       } catch (error) {
         playerNumber = "";
       }
 
       let playerPos =
-        playerTable[`${i}`].children[PLAYER_DATA.POSITION].children[0].data;
+        playerTable[row].children[PLAYER_DATA.POSITION].children[0].data;
       let playerHeight =
-        playerTable[`${i}`].children[PLAYER_DATA.HEIGHT].children[0].data;
+        playerTable[row].children[PLAYER_DATA.HEIGHT].children[0].data;
       let playerWeight =
-        playerTable[`${i}`].children[PLAYER_DATA.WEIGHT].children[0].data;
+        playerTable[row].children[PLAYER_DATA.WEIGHT].children[0].data;
       let playerBirthDay =
-        playerTable[`${i}`].children[PLAYER_DATA.BIRTHDATE].children[0].data;
+        playerTable[row].children[PLAYER_DATA.BIRTHDATE].children[0].data;
       let playerAge =
-        playerTable[`${i}`].children[PLAYER_DATA.AGE].children[0].data;
+        playerTable[row].children[PLAYER_DATA.AGE].children[0].data;
       let playerExp =
-        playerTable[`${i}`].children[PLAYER_DATA.EXPERIENCE].children[0].data;
+        playerTable[row].children[PLAYER_DATA.EXPERIENCE].children[0].data;
       let playerSchool =
-        playerTable[`${i}`].children[PLAYER_DATA.SCHOOL].children[0].data;
+        playerTable[row].children[PLAYER_DATA.SCHOOL].children[0].data;
       let playerAquisition;
 
       try {
         playerAquisition =
-          playerTable[`${i}`].children[PLAYER_DATA.HOWAQUIRED].children[0].data;
+          playerTable[row].children[PLAYER_DATA.HOWAQUIRED].children[0].data;
       } catch (error) {
         playerAquisition = "";
       }
 
-      players[`${playerName}`] = {
+      return {
+        name: playerName,
         number: playerNumber,
         position: playerPos,
         height: playerHeight,
@@ -122,9 +138,8 @@ async function scrape_players(profile_url) {
         aquisition: playerAquisition,
         link: playerLink,
         playerImageLink: playerImageLink,
-      };
-    }
-
+      }
+    });
     return players;
   } catch (error) {
     console.log("Cheerio failed to load response at players ");
@@ -133,8 +148,9 @@ async function scrape_players(profile_url) {
   }
 }
 
-async function scrape_player_image(player_url){
-  let response = await axios.get(player_url);
+async function scrape_player_image(player_url) {
+  await wait(200 + Math.random() * 500);
+  let response = await axios.get(player_url, HEADER);
 
   try {
     const $ = cheerio.load(response.data);
