@@ -1,6 +1,6 @@
 {
   "name": "nba_scraper",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A webscraper for scraping NBA teams and their player's into a CSV",
   "main": "index.js",
   "scripts": {

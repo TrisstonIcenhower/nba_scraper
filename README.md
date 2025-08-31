@@ -15,6 +15,7 @@ Includes team page links, team profiles, team image links, player profiles, and 
 - [Installiation](#installation)
 - [Usage](#usage)
 - [License](#license)
+- [Change Log](#changes)
 
 ## Installation
 
@@ -45,8 +46,16 @@ cd [link-to-directory]
 node index.js
 ```
 
-The project should work out of the box with no issues. It is quite slow at the moment, so if it hangs for several seconds do not worry. If for some reason it doesn't work for you, please raise an issue.
-
 ## License
 
 Distributed under the MIT License.
+
+## Changes
+
+### 1.1.0
+The issue with the slow processing came down to a few things. One thing was that the JSONtoFile function was being called for each team, so it would write and overwrite 30 times. Then, the async calls in scrape_players was executed one by one. Now it maps the call onto each row. This sped up the overall execution.
+
+The call is intentionally throttled as to avoid being blocked. I had issues with 403 errors from running without any timeouts.
+
+### 1.0.0
+The project should work out of the box with no issues. It is quite slow at the moment, so if it hangs for several seconds do not worry. If for some reason it doesn't work for you, please raise an issue.
